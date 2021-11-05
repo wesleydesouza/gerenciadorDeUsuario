@@ -46,5 +46,9 @@ class User{
     getDate(){
         return this._date;
     };
+
+    setPhoto(photo){
+        this._photo = photo;
+    };
     
 };

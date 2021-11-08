@@ -5,15 +5,31 @@ class UserController {
     };
 
     addLine(user) {
-        const tr = document.createElement("tr");
-        tr.innerHTML;
-
+        let tr = document.createElement("tr");
+        tr.innerHTML = `
+        <td class="table-icon">${user.getId()}</td>
+        <td class="table-icon"><img src='${user.getPhoto()}' alt="Ícone"</td>
+        <td class="table-name">${user.getName()}</td>
+        <td class="table-email">${user.getEmail()}</td>
+        <td class="table-phone">${user.getPhone()}</td>
+        <td class="table-date">${user.getDate()}</td>`;
+        if(user.getAdmin()){
+            tr.innerHTML+=`<td class="table-admin">Sim</td>`
+        }else{
+            tr.innerHTML+=`<td class="table-admin">Não</td>`
+        };
+        tr.innerHTML+=`
+        <td class="table-actions">
+            <span class="material-icons-sharp edit-btn">edit</span>
+            <span class="material-icons-sharp delete-btn">delete</span>
+        </td>`;
+       let tbody = document.querySelector(".users tbody").appendChild(tr);
     };
 
     readPhoto(data) {
         return new Promise((resolve, reject) => {
             const fileReader = new FileReader();
-            fileReader.addEventListener("load", (e) => {
+            fileReader.addEventListener("load", () => {
                 resolve(fileReader.result);
             });
             fileReader.addEventListener("error", (e)=>{
@@ -26,8 +42,9 @@ class UserController {
     register() {
         const formEL = document.querySelector(".register");
         const elements = formEL.elements;
+        let user;
         let registerData = {};
-        [...elements].forEach((v) => {
+        [...elements].forEach(v => {
             switch (v.type) {
                 case "checkbox":
                     registerData.admin = v.checked;
@@ -39,10 +56,8 @@ class UserController {
                     break;
             };
         })
-        console.log(registerData);
-        let user;
         if (JSON.stringify(this.users) == JSON.stringify({})) {
-            user = new User(0,registerData.name,"", registerData.photo, registerData.email, registerData.phone, registerData.admin, registerData.password);
+            user = new User(0,registerData.name,"",registerData.email, registerData.phone, registerData.admin, registerData.password);
         } else {
             const lastUser = Object.values({
                 "a": "teste",
@@ -51,21 +66,25 @@ class UserController {
                 "a": "teste",
                 "b": "teste2"
             }).length - 1];
-            user = new User(lastUser.getId() + 1, registerData.name,"", registerData.photo, registerData.email, registerData.phone, registerData.admin, registerData.password);
+            user = new User(lastUser.getId() + 1, registerData.name,"",registerData.email, registerData.phone, registerData.admin, registerData.password);
         };
         const fileEl = elements.photo;
         if(fileEl.files.length == 0){
             user.setPhoto("img/icon.jpg");
-            
+            this.addLine(user);
+            document.querySelector(".form-add").style.display="none";
+            formEL.reset();
         }else{
 
             this.readPhoto(fileEl.files[0]).then((result)=>{
                 user.setPhoto(result);
+                this.addLine(user);
+                document.querySelector(".form-add").style.display="none";
+                formEL.reset();
             },(e)=>{
                 console.error(e);
             })
         };
-        this.addLine(user);
     };
 
     addEventBtns() {

@@ -25,7 +25,7 @@ class UserController {
     };
 
     attRows(tr,user){
-        tr.datauser.user = JSON.stringify(user);
+        tr.dataset.user = JSON.stringify(user);
         tr.querySelector(".table-icon img").src = user.getPhoto();
         tr.querySelector(".table-name").innerHTML = user.getName();
         tr.querySelector(".table-email").innerHTML = user.getEmail();
@@ -38,8 +38,8 @@ class UserController {
     };
 
     edit(){
-        const formEl = document.querySelector("form.edit");
-        const elements = formEl.elements;
+        let formEl = document.querySelector("form.edit");
+        let elements = formEl.elements;
 
         let selectedUser = [...document.querySelectorAll(".users tr:not(:first-child)")].filter(v =>{
             if(JSON.parse(v.dataset.user)._id == elements.id.value){
@@ -54,35 +54,36 @@ class UserController {
         userObj._admin = elements.admin.checked;
         let user = new User(userObj._id, userObj._name, "", userObj._email, userObj._phone, userObj._admin, userObj._password);
 
-        if(!this.verifEmail(user)){
-            alert("E-mail já cadastrado.");
-            return;
-        };
-
         let files = elements.photo.files;
         if(files.length == 0){
             user.setPhoto(userObj._photo);
-            this.attUsers(user.getId(), user);
+            //this.attUsers(user.getId(), user);
             this.attRows(selectedUser[0], user);
-            this.closeForm(document.querySelector("form.edit"), document.querySelector(".form-edit"));
-            this.attLoginData();
+            //this.closeForm(document.querySelector("form.edit"), document.querySelector(".form-edit"));
+            //this.attLoginData();
+            document.querySelector(".form-edit").style.display = "none";
+            formEl.reset();
             
+            /*
             if(this.login.getId() == user.getId() && this.login.getEmail() != user.getEmail() || user.getAdmin() == false){
                 alert("Seus dados foram alterados, faça o login novamente!");
                 this.logout();
             };
+            */
         }else{
             this.readPhoto(files[0]).then(result => {
                 user.setPhoto(result);
-                this.attUsers(user.getId(), user);
+                //this.attUsers(user.getId(), user);
                 this.attRows(selectedUser[0], user);
-                this.closeForm(document.querySelector("form.edit"), document.querySelector(".form-edit"));
-                this.attLoginData();
-                
+                //this.closeForm(document.querySelector("form.edit"), document.querySelector(".form-edit"));
+                //this.attLoginData();
+                document.querySelector(".form-edit").style.display = "none";
+                formEl.reset();
+                /*
                 if(this.login.getId() == user.getId() && this.login.getEmail() != user.getEmail() || user.getAdmin() == false){
                     alert("Seus dados foram alterados, faça o login novamente!");
                     this.logout();
-                };
+                };*/
             },e => {
                 console.error(e);
             })
@@ -97,6 +98,7 @@ class UserController {
 
     addLine(user) {
         let tr = document.createElement("tr");
+        tr.dataset.user = JSON.stringify(user);
         tr.innerHTML = `
         <td class="table-icon">${user.getId()}</td>
         <td class="table-icon"><img src='${user.getPhoto()}' alt="Ícone"</td>
@@ -114,7 +116,21 @@ class UserController {
             <span class="material-icons-sharp edit-btn">edit</span>
             <span class="material-icons-sharp delete-btn">delete</span>
         </td>`;
-       let tbody = document.querySelector(".users tbody").appendChild(tr);
+       document.querySelector(".users tbody").appendChild(tr);
+
+       document.querySelectorAll(".edit-btn")[document.querySelectorAll(".edit-btn").length-1].addEventListener("click", ()=>{
+           document.querySelector(".form-edit").style.display = "flex";
+
+           const userObj = JSON.parse(tr.dataset.user);
+           const user = new User(userObj._id,userObj._name,userObj._photo,userObj._email,userObj._phone,userObj._admin,userObj._password);
+           let formEl = document.querySelector("form.edit");
+           let elements = formEl.elements;
+           elements.id.value = user.getId();
+           elements.name.value = user.getName();
+           elements.email.value = user.getEmail();
+           elements.phone.value = user.getPhone();
+           elements.admin.value = user.getAdmin();
+       })
     };
 
     readPhoto(data) {
@@ -184,7 +200,7 @@ class UserController {
 
         document.querySelectorAll(".close")[0].addEventListener("click", () => {
             this.closeForm(document.querySelector("form.register"), document.querySelector(".form-add"));
-            document.querySelector(".form-add").style.display = "none";
+            
         })
 
         document.querySelectorAll(".check")[0].addEventListener("click", () => {
@@ -192,8 +208,7 @@ class UserController {
         })
 
         document.querySelectorAll(".close")[1].addEventListener("click", () => {
-            this.closeForm(document.querySelector(".form.edit"), document.querySelector(".form-edit"));
-            document.querySelector(".form-edit").style.display = "none";
+            this.closeForm(document.querySelector("form.edit"), document.querySelector(".form-edit"));
         })
         document.querySelectorAll(".check")[1].addEventListener("click", () => {
             this.edit();

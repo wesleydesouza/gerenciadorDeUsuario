@@ -2,6 +2,14 @@ class UserController {
     constructor() {
         this.addEventBtns();
         this.users = {};
+        this.start();
+    };
+
+    start(){
+       const user = new User(0, "teste", "img/icon.jpg", "teste@teste", "51 12341234", true, "123");
+       const user2 = new User(1, "teste2", "img/icon.jpg", "teste@teste2", "51 12341235", false, "124");
+       this.addLine(user);
+       this.addLine(user2);
     };
 
     verifEmail(user){
@@ -59,10 +67,10 @@ class UserController {
             user.setPhoto(userObj._photo);
             //this.attUsers(user.getId(), user);
             this.attRows(selectedUser[0], user);
-            //this.closeForm(document.querySelector("form.edit"), document.querySelector(".form-edit"));
+            this.closeForm(document.querySelector("form.edit"), document.querySelector(".form-edit"));
             //this.attLoginData();
-            document.querySelector(".form-edit").style.display = "none";
-            formEl.reset();
+            //document.querySelector(".form-edit").style.display = "none";
+            //formEl.reset();
             
             /*
             if(this.login.getId() == user.getId() && this.login.getEmail() != user.getEmail() || user.getAdmin() == false){
@@ -75,10 +83,10 @@ class UserController {
                 user.setPhoto(result);
                 //this.attUsers(user.getId(), user);
                 this.attRows(selectedUser[0], user);
-                //this.closeForm(document.querySelector("form.edit"), document.querySelector(".form-edit"));
+                this.closeForm(document.querySelector("form.edit"), document.querySelector(".form-edit"));
                 //this.attLoginData();
-                document.querySelector(".form-edit").style.display = "none";
-                formEl.reset();
+                //document.querySelector(".form-edit").style.display = "none";
+                //formEl.reset();
                 /*
                 if(this.login.getId() == user.getId() && this.login.getEmail() != user.getEmail() || user.getAdmin() == false){
                     alert("Seus dados foram alterados, faça o login novamente!");
@@ -100,7 +108,7 @@ class UserController {
         let tr = document.createElement("tr");
         tr.dataset.user = JSON.stringify(user);
         tr.innerHTML = `
-        <td class="table-icon">${user.getId()}</td>
+        <td class="table-id">${user.getId()}</td>
         <td class="table-icon"><img src='${user.getPhoto()}' alt="Ícone"</td>
         <td class="table-name">${user.getName()}</td>
         <td class="table-email">${user.getEmail()}</td>
@@ -129,22 +137,23 @@ class UserController {
            elements.name.value = user.getName();
            elements.email.value = user.getEmail();
            elements.phone.value = user.getPhone();
-           elements.admin.value = user.getAdmin();
+           elements.admin.checked = user.getAdmin();
        })
     };
 
-    readPhoto(data) {
-        return new Promise((resolve, reject) => {
-            const fileReader = new FileReader();
-            fileReader.addEventListener("load", () => {
-                resolve(fileReader.result);
+    readPhoto(data){
+        return new Promise((resolve,reject)=>{
+            let fr = new FileReader();
+            fr.addEventListener('load',()=>{
+                resolve(fr.result);
             });
-            fileReader.addEventListener("error", (e)=>{
-                reject(e);
-            });
-            fileReader.readAsDataURL(data);
+            fr.addEventListener('error',(e)=>{
+                reject(e)
+            })
+            fr.readAsDataURL(data);
         })
-    };
+    }
+
 
     attUsers(key, value){
         this.users[key] = value;
@@ -152,8 +161,8 @@ class UserController {
     };
 
     register() {
-        const formEL = document.querySelector(".register");
-        const elements = formEL.elements;
+        const formEl = document.querySelector(".register");
+        const elements = formEl.elements;
         let user;
         let registerData = {};
         [...elements].forEach(v => {
@@ -174,7 +183,7 @@ class UserController {
             const lastUser = Object.values(this.users)[Object.values(this.users).length - 1];
             user = new User(lastUser.getId() + 1, registerData.name,"",registerData.email, registerData.phone, registerData.admin, registerData.password);
         };
-        const fileEl = elements.photo;
+        let fileEl = elements.photo;
         if(fileEl.files.length == 0){
             user.setPhoto("img/icon.jpg");
             this.users[user.getId()] = user;
@@ -214,8 +223,8 @@ class UserController {
             this.edit();
         })
 
-        document.querySelector('.logout').addEventListener('click',()=>{
+       /* document.querySelector('.logout').addEventListener('click',()=>{
             this.logout();
-        })
+        })*/
     };
 };

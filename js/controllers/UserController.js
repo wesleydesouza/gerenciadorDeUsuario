@@ -8,6 +8,8 @@ class UserController {
     start(){
        const user = new User(0, "teste", "img/icon.jpg", "teste@teste", "51 12341234", true, "123");
        const user2 = new User(1, "teste2", "img/icon.jpg", "teste@teste2", "51 12341235", false, "124");
+       this.users[user.getId()] = user;
+       this.users[user2.getId()] = user2;
        this.addLine(user);
        this.addLine(user2);
     };
@@ -64,6 +66,7 @@ class UserController {
 
         let files = elements.photo.files;
         if(files.length == 0){
+            this.users[user.getId()] = user;
             user.setPhoto(userObj._photo);
             //this.attUsers(user.getId(), user);
             this.attRows(selectedUser[0], user);
@@ -81,6 +84,7 @@ class UserController {
         }else{
             this.readPhoto(files[0]).then(result => {
                 user.setPhoto(result);
+                this.users[user.getId()] = user;
                 //this.attUsers(user.getId(), user);
                 this.attRows(selectedUser[0], user);
                 this.closeForm(document.querySelector("form.edit"), document.querySelector(".form-edit"));
@@ -125,10 +129,10 @@ class UserController {
             <span class="material-icons-sharp delete-btn">delete</span>
         </td>`;
        document.querySelector(".users tbody").appendChild(tr);
-
+       
        document.querySelectorAll(".edit-btn")[document.querySelectorAll(".edit-btn").length-1].addEventListener("click", ()=>{
            document.querySelector(".form-edit").style.display = "flex";
-
+           
            const userObj = JSON.parse(tr.dataset.user);
            const user = new User(userObj._id,userObj._name,userObj._photo,userObj._email,userObj._phone,userObj._admin,userObj._password);
            let formEl = document.querySelector("form.edit");
@@ -138,6 +142,16 @@ class UserController {
            elements.email.value = user.getEmail();
            elements.phone.value = user.getPhone();
            elements.admin.checked = user.getAdmin();
+       })
+
+       document.querySelectorAll(".delete-btn")[document.querySelectorAll(".delete-btn").length-1].addEventListener("click", () => {
+        if(confirm("Deseja deletar o usuário?")){
+            const userObj = JSON.parse(tr.dataset.user);
+            const user = new User(userObj._id,userObj._name,userObj._photo,userObj._email,userObj._phone,userObj._admin,userObj._password);
+            delete this.users[user.getId()];
+            tr.replaceWith("");
+            
+        }
        })
     };
 

@@ -14,7 +14,7 @@ class UserController {
         Object.values(this.users).forEach(v=>{
             const user = new User(v._id, v._name, v._photo, v._email, v._phone, v._admin, v._password);
             this.addLine(user);
-        })
+        });
     };
 
     verifEmail(user){

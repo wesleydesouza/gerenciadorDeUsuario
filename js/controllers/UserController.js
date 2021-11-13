@@ -6,12 +6,15 @@ class UserController {
     };
 
     start(){
-       const user = new User(0, "teste", "img/icon.jpg", "teste@teste", "51 12341234", true, "123");
-       const user2 = new User(1, "teste2", "img/icon.jpg", "teste@teste2", "51 12341235", false, "124");
-       this.users[user.getId()] = user;
-       this.users[user2.getId()] = user2;
-       this.addLine(user);
-       this.addLine(user2);
+        //salvando o usuario 
+        if(!localStorage.getItem("users")){
+            localStorage.getItem("users", "{}");
+        };
+        this.users = JSON.parse(localStorage.getItem("users"));
+        Object.values(this.users).forEach(v=>{
+            const user = new User(v._id, v._name, v._photo, v._email, v._phone, v._admin, v._password);
+            this.addLine(user);
+        })
     };
 
     verifEmail(user){
@@ -66,9 +69,8 @@ class UserController {
 
         let files = elements.photo.files;
         if(files.length == 0){
-            this.users[user.getId()] = user;
             user.setPhoto(userObj._photo);
-            //this.attUsers(user.getId(), user);
+            this.attUsers(user.getId(), user);
             this.attRows(selectedUser[0], user);
             this.closeForm(document.querySelector("form.edit"), document.querySelector(".form-edit"));
             //this.attLoginData();
@@ -84,8 +86,7 @@ class UserController {
         }else{
             this.readPhoto(files[0]).then(result => {
                 user.setPhoto(result);
-                this.users[user.getId()] = user;
-                //this.attUsers(user.getId(), user);
+                this.attUsers(user.getId(), user);
                 this.attRows(selectedUser[0], user);
                 this.closeForm(document.querySelector("form.edit"), document.querySelector(".form-edit"));
                 //this.attLoginData();
@@ -149,6 +150,7 @@ class UserController {
             const userObj = JSON.parse(tr.dataset.user);
             const user = new User(userObj._id,userObj._name,userObj._photo,userObj._email,userObj._phone,userObj._admin,userObj._password);
             delete this.users[user.getId()];
+            localStorage.setItem("users", JSON.stringify(this.users));
             tr.replaceWith("");
             
         }
@@ -194,20 +196,22 @@ class UserController {
         if (JSON.stringify(this.users) == JSON.stringify({})) {
             user = new User(0,registerData.name,"",registerData.email, registerData.phone, registerData.admin, registerData.password);
         } else {
-            const lastUser = Object.values(this.users)[Object.values(this.users).length - 1];
+            //definir lista de usuário
+            const lastUserObj = Object.values(this.users)[Object.values(this.users).length - 1];
+            const lastUser = new User(lastUserObj._id, lastUserObj._name, lastUserObj._photo, lastUserObj._email, lastUserObj._phone, lastUserObj._admin, lastUserObj._password);
             user = new User(lastUser.getId() + 1, registerData.name,"",registerData.email, registerData.phone, registerData.admin, registerData.password);
         };
         let fileEl = elements.photo;
         if(fileEl.files.length == 0){
             user.setPhoto("img/icon.jpg");
-            this.users[user.getId()] = user;
+            this.attUsers(user.getId(), user);
             this.addLine(user);
             this.closeForm(document.querySelector("form.register"), document.querySelector(".form-add"));
         }else{
 
             this.readPhoto(fileEl.files[0]).then((result)=>{
                 user.setPhoto(result);
-                this.users[user.getId()] = user;
+                this.attUsers(user.getId(), user);
                 this.addLine(user);
                 this.closeForm(document.querySelector("form.register"), document.querySelector(".form-add"));
             },(e)=>{
